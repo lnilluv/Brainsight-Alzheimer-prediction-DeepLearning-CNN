@@ -15,9 +15,6 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - BACKEND_STORE_URI="mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysqldb:3306/${MYSQL_DATABASE}" 
-        #- ARTIFACT_ROOT="s3//mlflow/"
-        #      - ARTIFACT_ROOT=${MINIO_SERVER_URL}
-
 
     depends_on:
       - postgresdb
@@ -26,6 +23,8 @@ services:
       - "traefik.http.routers.fastapi.rule=Host(`$API`)"
       - "traefik.http.routers.fastapi.tls=true"
       - "traefik.http.routers.fastapi.tls.certresolver=letsencrypt"
+
+
   postgresdb:
     container_name: fastapi_db
     image: postgres:13-alpine
@@ -106,14 +105,8 @@ services:
 
   mysqldb:
     restart: always
-    # image: mariadb
-    # image: mysql/mysql-server:8.0
     image: mysql:8.0.32-debian
-    # build:
-    #   context: .
-    #   dockerfile: app/mysqldb/Dockerfile
     container_name: mlflow_db
-    # command: tail -F anything
     expose:
       - 3306
     environment:
@@ -123,7 +116,7 @@ services:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     volumes:
       - openbrain_dbdata:/var/lib/mysql:rw
-      # - ./run/:/var/run/mysqld:rw
+
 
   mlflow:
     restart: always
@@ -168,7 +161,6 @@ services:
       - "traefik.http.routers.nginx.rule=Host(`$NGINX`)"
       - "traefik.http.routers.nginx.tls=true"
       - "traefik.http.routers.nginx.tls.certresolver=letsencrypt"
-        # - "traefik.http.services.nginx.loadbalancer.server.port:80"
     volumes:
       - ./app/nginx/conf/www.pryda.dev.conf:/etc/nginx/conf.d/www.pryda.dev:ro
       - ./app/nginx/data/:/usr/share/nginx/html/
