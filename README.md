@@ -14,10 +14,6 @@ https://www.brainsight.tech
 [Video demonstration of the web app](https://www.youtube.com/watch?v=3anHg1pY6PQ)
 
 
-## Contact
-
-You can contact me at **laurent.nilluv@gmail.com**
-
 ## 🧐 Deployed apps
 - FastAPI (RestAPI using Postgresdb): https://api.brainsight.tech/docsapi.brainsight.tech/docs
 - Traefik (Reverse proxy)
