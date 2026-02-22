@@ -1,10 +1,8 @@
-# Dockerfile.prod
+FROM tiangolo/uvicorn-gunicorn:python3.11-slim
 
-FROM tiangolo/uvicorn-gunicorn:python3.8-slim
+RUN apt-get update && apt-get install -y --no-install-recommends netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y netcat
+COPY /app/fastapi/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-COPY /app/fastapi/requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY ./app/fastapi .
+COPY ./app/fastapi /app

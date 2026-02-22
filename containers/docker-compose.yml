@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     container_name: fastapi
@@ -18,6 +16,8 @@ services:
 
     depends_on:
       - postgresdb
+    security_opt:
+      - no-new-privileges:true
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.fastapi.rule=Host(`$API`)"
@@ -72,6 +72,8 @@ services:
       - MINIO_SERVER_URL=$MINIO_SERVER_URL
     volumes:
       - minio_data:/data
+    security_opt:
+      - no-new-privileges:true
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.minio-console.rule=Host(`$CONSOLE_BUCKET`)"
@@ -90,22 +92,21 @@ services:
     depends_on:
       - minio
     container_name: mc
-    env_file:
-      - .env
+    environment:
+      - MINIO_SERVER_URL=$MINIO_SERVER_URL
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     entrypoint: >
       /bin/sh -c "
       until (/usr/bin/mc config host add minio ${MINIO_SERVER_URL} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY}) do echo '...waiting...' && sleep 1; done;
       /usr/bin/mc mb minio/mlflow;
       /usr/bin/mc policy set download minio/mlflow;
       exit 0;
-      "      
-      
-      #volumes:
-      #- ./wait-for-it.sh:/tmp/wait-for-it.sh
+      "
 
   mysqldb:
     restart: always
-    image: mysql:8.0.32-debian
+    image: mysql:8.0
     container_name: mlflow_db
     expose:
       - 3306
@@ -127,6 +128,8 @@ services:
       - mysqldb
     expose:
       - 5000
+    security_opt:
+      - no-new-privileges:true
     environment:
       - MLFLOW_S3_ENDPOINT_URL=$MLFLOW_S3_ENDPOINT_URL
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
@@ -137,6 +140,7 @@ services:
       - "traefik.http.routers.mlflow.rule=Host(`$MLFLOW`)"
       - "traefik.http.routers.mlflow.tls=true"
       - "traefik.http.routers.mlflow.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.mlflow.middlewares=auth"
 
   streamlit:
     build: ./app/streamlit
@@ -145,6 +149,8 @@ services:
     expose:
       - 8501
     command: streamlit run app.py
+    security_opt:
+      - no-new-privileges:true
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.streamlit.rule=Host(`$STREAMLIT`)"
@@ -153,7 +159,7 @@ services:
 
   nginx:
     container_name: nginx
-    image: nginx:latest
+    image: nginx:1.27.5-alpine
     restart: unless-stopped
     entrypoint: ''
     labels:
@@ -161,13 +167,14 @@ services:
       - "traefik.http.routers.nginx.rule=Host(`$NGINX`)"
       - "traefik.http.routers.nginx.tls=true"
       - "traefik.http.routers.nginx.tls.certresolver=letsencrypt"
+    security_opt:
+      - no-new-privileges:true
     volumes:
-      - ./app/nginx/conf/www.pryda.dev.conf:/etc/nginx/conf.d/www.pryda.dev:ro
+      - ./app/nginx/conf/www.brainsight.tech:/etc/nginx/conf.d/www.brainsight.tech:ro
       - ./app/nginx/data/:/usr/share/nginx/html/
 
 volumes:
   openbrain_dbdata:
-    external: true
   minio_data:
   postgres_data_prod:
   letsencrypt:

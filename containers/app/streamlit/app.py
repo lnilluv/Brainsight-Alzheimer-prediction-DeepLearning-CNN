@@ -1,12 +1,7 @@
 import streamlit as st
-import numpy as np
-import tensorflow as tf
 import warnings
-import platform
 from PIL import Image
-from utils import image2tensor, pred2label
 import requests
-import json
 
 warnings.filterwarnings('ignore')
 st.set_option('deprecation.showfileUploaderEncoding', False)
@@ -24,25 +19,18 @@ if img_file:
 
 
 def on_submit():
-    '''
-        consume deep learning model
-    '''
+    """Consume deep learning model through API."""
     if img_file:
         img = img_file.getvalue()
-        files = {'file': img}
-        
-        # API Endpoint
-        endpoint = options[selected_option]
-        response = requests.post(endpoint, files=files)
+        files = {"file": img}
 
-        # response = requests.post('https://api.brainsight.tech/predictionalz', files=files)
+        endpoint = options[selected_option]
+        response = requests.post(endpoint, files=files, timeout=30)
+        response.raise_for_status()
         prediction = response.json()
-        print(prediction["predicted_label"])
         st.header(f"Prediction: {prediction['predicted_label']}")
-    print('ok')
 
 
 st.sidebar.button('Start prediction', key=None, help=None,
                   on_click=on_submit, disabled=False)
-
 

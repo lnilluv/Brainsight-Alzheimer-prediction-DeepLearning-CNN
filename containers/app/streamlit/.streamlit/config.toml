@@ -2,8 +2,8 @@
 serverAddress = '0.0.0.0'
 
 [server]
-enableCORS = false
-enableXsrfProtection = false
+enableCORS = true
+enableXsrfProtection = true
 enableWebsocketCompression = false
 
 [global]

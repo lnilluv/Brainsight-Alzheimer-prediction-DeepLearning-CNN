@@ -1,5 +1,5 @@
 # Dockerfile.traefik
 
-FROM traefik:v2.9.6
+FROM traefik:v2.11.16
 
 COPY /app/traefik/traefik.toml ./etc/traefik/traefik.toml
