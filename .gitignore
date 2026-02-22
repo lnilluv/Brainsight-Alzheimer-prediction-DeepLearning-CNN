@@ -9,5 +9,8 @@ secrets.sh
 content_old/
 .idea/
 .ipynb_checkpoints
-
-
+.worktrees/
+containers/letsencrypt/acme.json
+SECURITY.md
+docs/deployment/vps-hardening-checklist.md
+__pycache__/
